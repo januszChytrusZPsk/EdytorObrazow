@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="AnchorPane" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="projektgrafika.RozdzkaControler">
+   <children>
+      <ImageView fx:id="view" fitHeight="1.0" fitWidth="1.0" pickOnBounds="true" preserveRatio="true" />
+   </children>
+</AnchorPane>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Rectangle2D?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="460.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="projektgrafika.FXMLDocumentController">
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu mnemonicParsing="false" text="Plik">
+            <items>
+                <MenuItem mnemonicParsing="false" onAction="#openPicOption" text="Otworz obraz" />
+                  <MenuItem mnemonicParsing="false" onAction="#saveOption" text="Zapisz obraz" />
+                <SeparatorMenuItem mnemonicParsing="false" />
+                <MenuItem mnemonicParsing="false" onAction="#exitOption" text="Wyjście" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Filtry">
+            <items>
+                  <RadioMenuItem mnemonicParsing="false" onAction="#usrOption" text="Uśredniający">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="filtr" />
+                     </toggleGroup>
+                  </RadioMenuItem>
+                  <RadioMenuItem mnemonicParsing="false" onAction="#hp3Option" text="HP3" toggleGroup="$filtr" />
+                  <RadioMenuItem mnemonicParsing="false" onAction="#sobOption" text="Pionowy filtr Sobela" toggleGroup="$filtr" />
+                  <RadioMenuItem mnemonicParsing="false" onAction="#rndOption" text="Losowy" toggleGroup="$filtr" />
+                  <RadioMenuItem mnemonicParsing="false" onAction="#usrOption" text="Wprowadź własny" toggleGroup="$filtr" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <RadioMenuItem fx:id="czyCB" mnemonicParsing="false" onAction="#cbOption" text="Czarno-Białe" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Pomoc">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#aboutOption" text="O programie" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <left>
+      <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+              <ImageView fx:id="oriImage" fitHeight="370.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_RIGHT">
+               <viewport>
+                  <Rectangle2D />
+               </viewport></ImageView>
+         </children>
+      </StackPane>
+   </left>
+   <right>
+      <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fx:id="endImage" fitHeight="370.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true" />
+         </children>
+      </StackPane>
+   </right>
+   <center>
+      <Separator orientation="VERTICAL" prefHeight="200.0" BorderPane.alignment="CENTER" />
+   </center>
+   <bottom>
+      <StackPane prefHeight="30.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <Separator prefWidth="200.0" StackPane.alignment="TOP_CENTER">
+               <cursor>
+                  <Cursor fx:constant="DEFAULT" />
+               </cursor>
+            </Separator>
+            <AnchorPane prefHeight="66.0" prefWidth="600.0">
+               <children>
+                  <Button layoutX="14.0" layoutY="2.0" mnemonicParsing="false" onAction="#noweOkno" text="Ustaw swoją maske" />
+                  <Button fx:id="przyciskStart" layoutX="526.0" layoutY="2.0" mnemonicParsing="false" onAction="#startButton" text="Start !" />
+                  <Label layoutX="419.0" layoutY="7.0" text="Moc różdżki" />
+                  <Separator layoutX="495.0" layoutY="-1.0" orientation="VERTICAL" prefHeight="31.0" prefWidth="0.0" />
+                  <Separator layoutX="498.0" orientation="VERTICAL" prefHeight="31.0" prefWidth="0.0" />
+                  <ToggleButton fx:id="czyRozdzka" layoutX="157.0" layoutY="2.0" mnemonicParsing="false" onAction="#czyRozdzkaButton" text="Różdzka" />
+                  <ComboBox fx:id="mocRozdzki" layoutX="260.0" layoutY="3.0" onAction="#setMoc" prefWidth="150.0" />
+               </children>
+            </AnchorPane>
+         </children>
+      </StackPane>
+   </bottom>
+</BorderPane>

@@ -49,7 +49,6 @@ public class FXMLDocumentController implements Initializable {
 	@FXML private RadioMenuItem czyCB;
 	
 	private boolean czyCzarnoBiale;
-	private boolean czyRozdzkaDziala;
 	private File plik;
     private BufferedImage wczytanyObraz;
     private Image wczytanyIMG;
@@ -61,11 +60,10 @@ public class FXMLDocumentController implements Initializable {
     private boolean blad;
     private Typ wybranaMaska;
     private int moc;
-    private double y ,x;
 
     private Maska maskaObiekt;
 	private Algorytm filtrowanie;
-	private Images images;
+	private Rozdzka rozdzka;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -75,12 +73,11 @@ public class FXMLDocumentController implements Initializable {
     	czyWybranaMaska = false;
     	czyCzarnoBiale = false; 
     	wybranaMaska = Typ.LOSOWY;
-    	images = new Images();
     	maskaObiekt = new Maska();
     	filtrowanie = new Algorytm();
-    	czyRozdzkaDziala = false;
+    	rozdzka = new Rozdzka();
+    	rozdzka.setCzyAktywna(false);
     	moc = 0;
-    	y = x = 0.0;
     	mocRozdzki.getItems().addAll("0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
     								"10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
     								"20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
@@ -89,35 +86,14 @@ public class FXMLDocumentController implements Initializable {
     								"50", "51");
 
     	mocRozdzki.setValue("0");
-    	
-    	oriImage.setOnMouseClicked(new EventHandler<MouseEvent>(){
-            @Override
-            public void handle(MouseEvent arg0) {
-              try {
-            	if(czyObrazek)
-            		ustawPozycjeRozdzki();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-            }
-    	}
-    	);
     }  
-    
-    public void setUser (int[] maska) {
-        this.maskaObiekt.setUserMask(maska);
-    }
-    
-    public void setPos  (double[] pos) {
-    	this.x = pos[0];
-    	this.y = pos[1];
-    }
+
     
     @FXML private void openPicOption(ActionEvent event) throws MalformedURLException, IOException {
     	blad = false;
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Otwórz Plik");
-        fileChooser.getExtensionFilters().add( new ExtensionFilter("Obrazy","*.jpg", "*.jpeg"));
+        fileChooser.getExtensionFilters().add( new ExtensionFilter("Obrazy","*.jpg", "*.jpeg","*.bmp"));
         plik = fileChooser.showOpenDialog(new Stage());
         if (plik != null) { 
         	try {
@@ -171,57 +147,64 @@ public class FXMLDocumentController implements Initializable {
 
 
     @FXML private void startButton(ActionEvent event) throws Exception {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(new start());
+        rozpocznij();
+    }
+
+    private void rozpocznij(){
+        if (czyObrazek && czyWybranaMaska) {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.execute(new start());
+        }
+        if (!czyObrazek && !czyWybranaMaska) {
+            this.alert("Brak obrazu i wybranego filtru!\nWczytaj obraz i wybierz filtr!");
+        } else {
+            if (!czyObrazek) {
+                this.alert("Brak obrazu !\nWczytaj najpierw obraz!");
+            }
+            if (!czyWybranaMaska) {
+                this.alert("Brak wybranego filtru!\nWybierz najpierw filtr!");
+            }
+        }
     }
 
 
     class start implements Runnable {
-
         @Override
         public void run() {
-
-            if (czyObrazek && czyWybranaMaska) {
-                filtrowanie = new Algorytm(wczytanyObraz, wybranaMaska);
+                filtrowanie.wybierzObraz(wczytanyObraz);
+                filtrowanie.wybierzMaske(wybranaMaska);
                 if (czyCzarnoBiale) {
                     BufferedImage bc = deepCopy(otrzymanyObraz);
                     bc = filtrowanie.odcienieSzarosci(bc);
                     filtrowanie.wybierzObraz(bc);
-                } else
-                    filtrowanie.wybierzObraz(wczytanyObraz);
-                if (czyRozdzkaDziala) {
-                    filtrowanie.wlaczRozdzke();
-                    filtrowanie.ustawPozycjeRozdzki((int) images.getX(), (int) images.getY());
-                } else
-                    filtrowanie.wylaczRozdzke();
+                }
                 filtrowanie.filtruj();
                 otrzymanyObraz = filtrowanie.pobierzObrazPoFiltracji();
 
                 otrzymanyIMG = SwingFXUtils.toFXImage(otrzymanyObraz, null);
                 wyswietlObrazek(endImage, otrzymanyIMG);
                 czyOtrzymano = true;
-            }
-            if (!czyObrazek && !czyWybranaMaska) {
-                alert("Brak obrazu i wybranego filtru!\nWczytaj obraz i wybierz filtr!");
-            } else {
-                if (!czyObrazek) {
-                    alert("Brak obrazu !\nWczytaj najpierw obraz!");
-                }
-                if (!czyWybranaMaska) {
-                    alert("Brak wybranego filtru!\nWybierz najpierw filtr!");
-                }
-            }
+        }
+
+        private void alert(String text){
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Filtrowanie Obrazów");
+            alert.setHeaderText(null);
+            alert.setContentText(text);
+            Stage st = (Stage) alert.getDialogPane().getScene().getWindow();
+            st.getIcons().add(new Image(this.getClass().getResource("ico.jpg").toString()));
+            alert.showAndWait();
         }
 
     }
     
     @FXML private void czyRozdzkaButton(ActionEvent event) {
     	
-    	if(czyRozdzkaDziala) {
-    		czyRozdzkaDziala = false;
+    	if(rozdzka.isCzyAktywna()) {
+    		rozdzka.setCzyAktywna(false);
     	}
     	else {
-    		czyRozdzkaDziala = true;
+    		rozdzka.setCzyAktywna(true);
     	}
     }
 
@@ -270,32 +253,14 @@ public class FXMLDocumentController implements Initializable {
     }
     
     @FXML private void aboutOption(ActionEvent event) {
-        alert("Autorzy: \nTomasz Szyma�ski");    
+        alert("Autor: \nTomasz Szyma�ski");
     }
     
     @FXML private void exitOption(ActionEvent event) {
         Platform.exit();
     }
     
-    @FXML private void noweOkno(ActionEvent event){	
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("layout/MaskaView.fxml"));
-            Parent maska = loader.load();
-            
-            Scene scene = new Scene(maska);
-            
-            MaskaControler controler = loader.getController();
-            controler.getMask(this.maskaObiekt);
-            
-            Stage window = (Stage) ((Node)(event.getSource())).getScene().getWindow();
-            window.setScene(scene);
-            window.show();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }              
-    }
+
     
     
     private void wczytajObrazek(File plik){
@@ -308,34 +273,70 @@ public class FXMLDocumentController implements Initializable {
         }
                 
     }
-    
-    private void wyswietlObrazek(ImageView view, Image image){
-                view.setImage(image);              
-    }
-    
-    private void alert(String text){
-                Alert alert = new Alert(AlertType.INFORMATION);
-                alert.setTitle("Projekt Grafika");
-                alert.setHeaderText(null);
-                alert.setContentText(text);
-                Stage st = (Stage) alert.getDialogPane().getScene().getWindow();
-                st.getIcons().add(new Image(this.getClass().getResource("ico.jpg").toString()));
-                alert.showAndWait();             
+
+
+    @FXML
+    private void ustawPozycjeRozdzki() {
+        oriImage.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent event) {
+                if (rozdzka.isCzyAktywna()) {
+                    int x = (int) event.getX();
+                    int y = (int) event.getY();
+
+
+                    rozdzka.setX(x);
+                    rozdzka.setY(y);
+                    System.out.println(rozdzka.getX() + " "+ rozdzka.getY());
+                    try {
+                        rozpocznij();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    alert("Różdzka nie jest aktywna !!");
+                }
+
+            }
+        });
     }
 
-    private void ustawPozycjeRozdzki() throws IOException {
-    	images.setImg(this.wczytanyIMG);
-    	FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource("layout/RozdzkaView.fxml"));
-        Parent rozdzka = loader.load();
-        
-        Scene scene = new Scene(rozdzka);
-        
-        RozdzkaControler controler = loader.<RozdzkaControler>getController();
-        controler.getImage(images);
-        
-        Stage window = new Stage();
-        window.setScene(scene);
-        window.show();
-    }   
+
+
+    private void wyswietlObrazek(ImageView view, Image image){
+        view.setImage(image);
+    }
+
+    @FXML private void rozdzkaWindow(ActionEvent event){
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("layout/MaskaView.fxml"));
+            Parent maska = loader.load();
+
+            Scene scene = new Scene(maska);
+
+            MaskaControler controler = loader.<MaskaControler>getController();
+            controler.getMask(this.maskaObiekt);
+
+            Stage window = new Stage();
+            window.setResizable(false);
+            window.setScene(scene);
+            window.show();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void alert(String text){
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle("Filtrowanie Obrazów");
+        alert.setHeaderText(null);
+        alert.setContentText(text);
+        Stage st = (Stage) alert.getDialogPane().getScene().getWindow();
+        st.setResizable(false);
+        st.getIcons().add(new Image(this.getClass().getResource("ico.jpg").toString()));
+        alert.showAndWait();
+    }
 }

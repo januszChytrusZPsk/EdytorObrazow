@@ -19,7 +19,8 @@
 <?import javafx.scene.layout.StackPane?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="460.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="projektgrafika.FXMLDocumentController">
-   <top>
+
+    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
           <Menu mnemonicParsing="false" text="Plik">
@@ -56,7 +57,7 @@
    <left>
       <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-              <ImageView fx:id="oriImage" fitHeight="370.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_RIGHT">
+              <ImageView fx:id="oriImage" fitHeight="370.0" fitWidth="300.0" onMouseClicked="#ustawPozycjeRozdzki" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_RIGHT">
                <viewport>
                   <Rectangle2D />
                </viewport></ImageView>
@@ -83,7 +84,7 @@
             </Separator>
             <AnchorPane prefHeight="66.0" prefWidth="600.0">
                <children>
-                  <Button layoutX="14.0" layoutY="2.0" mnemonicParsing="false" onAction="#noweOkno" text="Ustaw swoją maske" />
+                  <Button layoutX="14.0" layoutY="2.0" mnemonicParsing="false" onAction="#rozdzkaWindow" text="Ustaw swoją maske" />
                   <Button fx:id="przyciskStart" layoutX="526.0" layoutY="2.0" mnemonicParsing="false" onAction="#startButton" text="Start !" />
                   <Label layoutX="419.0" layoutY="7.0" text="Moc różdżki" />
                   <Separator layoutX="495.0" layoutY="-1.0" orientation="VERTICAL" prefHeight="31.0" prefWidth="0.0" />

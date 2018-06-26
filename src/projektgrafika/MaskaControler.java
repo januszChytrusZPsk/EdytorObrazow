@@ -4,17 +4,22 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.ResourceBundle;
+
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.print.PageLayout;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.stage.Stage;
 
+import javafx.stage.Window;
 import projektgrafika.GrafikaProjekt.*;
 
 public  class MaskaControler implements Initializable {
@@ -43,11 +48,14 @@ public  class MaskaControler implements Initializable {
     @FXML private Spinner<Integer> f43;
     @FXML private Spinner<Integer> f34;
     @FXML private Spinner<Integer> f44;
+    @FXML private Button maskaButton;
     
     private int[] maska=new int[25];
+    Maska mask ;
   
     public void getMask(Maska mask) {
-    	maska = Arrays.copyOf(mask.pobierzMaske(Typ.UZYTKOWNIKA),25);
+        this.mask = mask;
+    	maska = Arrays.copyOf(this.mask.pobierzMaske(Typ.UZYTKOWNIKA),25);
     	SpinnerValueFactory<Integer> valueFactoryf00 = new SpinnerValueFactory.IntegerSpinnerValueFactory(-5, 5, maska[0]);
         SpinnerValueFactory<Integer> valueFactoryf01 = new SpinnerValueFactory.IntegerSpinnerValueFactory(-5, 5, maska[1]);
         SpinnerValueFactory<Integer> valueFactoryf02 = new SpinnerValueFactory.IntegerSpinnerValueFactory(-5, 5, maska[2]);
@@ -143,24 +151,11 @@ public  class MaskaControler implements Initializable {
         maska[22]=Integer.parseInt(f42.getValue().toString());
         maska[23]=Integer.parseInt(f43.getValue().toString());
         maska[24]=Integer.parseInt(f44.getValue().toString());
-        
-       try {
-    	   FXMLLoader loader = new FXMLLoader();
-           loader.setLocation(getClass().getResource("layout/FXMLDocument.fxml"));
-           Parent glowne = loader.load();
-           
-           Scene scene = new Scene(glowne);
-           
-           FXMLDocumentController controler = loader.getController();
-           controler.setUser(maska);
-           
-           Stage window = (Stage) ((Node)(event.getSource())).getScene().getWindow();
-           window.setScene(scene);
-           window.show();
-       }
-       catch (IOException e) {
-           e.printStackTrace();
-       }
+
+        this.mask.setUserMask(maska);
+
+        Stage stage = (Stage) maskaButton.getScene().getWindow();
+        stage.close();
     }
     
     

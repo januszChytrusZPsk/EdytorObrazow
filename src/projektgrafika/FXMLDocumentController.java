@@ -1,26 +1,12 @@
 package projektgrafika;
 
 
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.WritableRaster;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -30,14 +16,26 @@ import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
-
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
-import javax.imageio.ImageIO;
+import projektgrafika.GrafikaProjekt.Algorytm;
+import projektgrafika.GrafikaProjekt.Maska;
+import projektgrafika.GrafikaProjekt.Rozdzka;
+import projektgrafika.GrafikaProjekt.Typ;
 
-import projektgrafika.GrafikaProjekt.*;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 
@@ -49,7 +47,6 @@ public class FXMLDocumentController implements Initializable {
 	@FXML private RadioMenuItem czyCB;
 	
 	private boolean czyCzarnoBiale;
-	private File plik;
     private BufferedImage wczytanyObraz;
     private Image wczytanyIMG;
     private Image otrzymanyIMG;
@@ -74,9 +71,9 @@ public class FXMLDocumentController implements Initializable {
     	czyCzarnoBiale = false; 
     	wybranaMaska = Typ.LOSOWY;
     	maskaObiekt = new Maska();
-    	filtrowanie = new Algorytm();
     	rozdzka = new Rozdzka();
     	rozdzka.setCzyAktywna(false);
+    	filtrowanie = new Algorytm(rozdzka);
     	moc = 0;
     	mocRozdzki.getItems().addAll("0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
     								"10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -89,12 +86,12 @@ public class FXMLDocumentController implements Initializable {
     }  
 
     
-    @FXML private void openPicOption(ActionEvent event) throws MalformedURLException, IOException {
+    @FXML private void openPicOption(ActionEvent event) {
     	blad = false;
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Otwórz Plik");
         fileChooser.getExtensionFilters().add( new ExtensionFilter("Obrazy","*.jpg", "*.jpeg","*.bmp"));
-        plik = fileChooser.showOpenDialog(new Stage());
+        File plik = fileChooser.showOpenDialog(new Stage());
         if (plik != null) { 
         	try {
             wczytajObrazek(plik);
@@ -138,7 +135,7 @@ public class FXMLDocumentController implements Initializable {
     	}
     }
     
-    static BufferedImage deepCopy(BufferedImage image) {
+    private static BufferedImage deepCopy(BufferedImage image) {
     	 ColorModel colorModel = image.getColorModel();
     	 boolean isAlphaPremultiplied = colorModel.isAlphaPremultiplied();
     	 WritableRaster raster = image.copyData(null);
@@ -146,7 +143,7 @@ public class FXMLDocumentController implements Initializable {
     	}
 
 
-    @FXML private void startButton(ActionEvent event) throws Exception {
+    @FXML private void startButton(ActionEvent event) {
         rozpocznij();
     }
 
@@ -171,6 +168,7 @@ public class FXMLDocumentController implements Initializable {
     class start implements Runnable {
         @Override
         public void run() {
+            try {
                 filtrowanie.wybierzObraz(wczytanyObraz);
                 filtrowanie.wybierzMaske(wybranaMaska);
                 if (czyCzarnoBiale) {
@@ -184,18 +182,10 @@ public class FXMLDocumentController implements Initializable {
                 otrzymanyIMG = SwingFXUtils.toFXImage(otrzymanyObraz, null);
                 wyswietlObrazek(endImage, otrzymanyIMG);
                 czyOtrzymano = true;
+            } catch (Exception e) {
+            e.printStackTrace();
+            }
         }
-
-        private void alert(String text){
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setTitle("Filtrowanie Obrazów");
-            alert.setHeaderText(null);
-            alert.setContentText(text);
-            Stage st = (Stage) alert.getDialogPane().getScene().getWindow();
-            st.getIcons().add(new Image(this.getClass().getResource("ico.jpg").toString()));
-            alert.showAndWait();
-        }
-
     }
     
     @FXML private void czyRozdzkaButton(ActionEvent event) {
@@ -245,11 +235,7 @@ public class FXMLDocumentController implements Initializable {
         filtrowanie.wybierzMaske(Typ.UZYTKOWNIKA);
     }
     @FXML private void cbOption(ActionEvent event) {
-        if (!czyCzarnoBiale) {
-            czyCzarnoBiale = true;
-        }
-      	else
-        	czyCzarnoBiale = false;              	
+        czyCzarnoBiale = !czyCzarnoBiale;
     }
     
     @FXML private void aboutOption(ActionEvent event) {
@@ -277,28 +263,24 @@ public class FXMLDocumentController implements Initializable {
 
     @FXML
     private void ustawPozycjeRozdzki() {
-        oriImage.setOnMouseClicked(new EventHandler<MouseEvent>() {
-
-            @Override
-            public void handle(MouseEvent event) {
-                if (rozdzka.isCzyAktywna()) {
-                    int x = (int) event.getX();
-                    int y = (int) event.getY();
+        oriImage.setOnMouseClicked(event -> {
+            if (rozdzka.isCzyAktywna()) {
+                int x = (int) event.getX();
+                int y = (int) event.getY();
 
 
-                    rozdzka.setX(x);
-                    rozdzka.setY(y);
-                    System.out.println(rozdzka.getX() + " "+ rozdzka.getY());
-                    try {
-                        rozpocznij();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    alert("Różdzka nie jest aktywna !!");
+                rozdzka.setX(x);
+                rozdzka.setY(y);
+                System.out.println(rozdzka.getX() + " "+ rozdzka.getY());
+                try {
+                    rozpocznij();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
+            } else {
+                alert("Różdzka nie jest aktywna !!");
             }
+
         });
     }
 
@@ -316,7 +298,7 @@ public class FXMLDocumentController implements Initializable {
 
             Scene scene = new Scene(maska);
 
-            MaskaControler controler = loader.<MaskaControler>getController();
+            MaskaControler controler = loader.getController();
             controler.getMask(this.maskaObiekt);
 
             Stage window = new Stage();
